@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ArticleCategoryController;
 use App\Http\Controllers\ArticleSourceController;
 use App\Http\Controllers\Auth\AuthenticatedUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -29,5 +30,8 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
 
     // List all article sources
     Route::get('/article-source', [ArticleSourceController::class, 'index'])->name('user.article-source.list');
+
+    // List all article categories
+    Route::get('/article-category', [ArticleCategoryController::class, 'index'])->name('user.article-category.list');
 
 });
