@@ -69,7 +69,7 @@ final class AppServiceProvider extends ServiceProvider
     {
         try {
             DB::connection('sqlite')->statement('PRAGMA synchronous = OFF;');
-        } catch (Throwable $e) { // @codeCoverageIgnoreStart
+        } catch (Throwable) { // @codeCoverageIgnoreStart
             return;
         } // @codeCoverageIgnoreEnd
     }
