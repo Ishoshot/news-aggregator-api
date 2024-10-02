@@ -8,6 +8,7 @@ use App\Http\Requests\ArticleSearchRequest;
 use App\Models\Article;
 use App\Services\Internal\ArticleService;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -40,6 +41,36 @@ final class ArticleController
             Log::error('Error occurred while retrieving articles: '.$e->getMessage());
 
             return response()->json(['message' => 'Error occurred while retrieving articles.'], 500);
+
+        }// @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Retrieve a single article's details.
+     */
+    public function show(string $id): JsonResponse
+    {
+        try {
+
+            $article = Article::with([
+                'source:id,name,slug',
+                'author:id,name,slug',
+                'category:id,name,slug',
+            ])->findOrFail($id);
+
+            return response()->json(['message' => 'Article details retrieved successfully.', 'data' => $article]);
+
+        } catch (ModelNotFoundException $e) {
+
+            Log::error('Article with id - '.$id.' not found: '.$e->getMessage());
+
+            return response()->json(['message' => 'Article with id - '.$id.' not found'], 404);
+
+        } catch (Exception $e) {// @codeCoverageIgnoreStart
+
+            Log::error('Error occurred while retrieving articles: '.$e->getMessage());
+
+            return response()->json(['message' => 'Error occurred while retrieving article.'], 500);
 
         }// @codeCoverageIgnoreEnd
     }

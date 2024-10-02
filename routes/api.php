@@ -54,6 +54,8 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
 
         Route::get('/', [ArticleController::class, 'index'])->name('user.article.list');
 
+        Route::get('/{id}', [ArticleController::class, 'show'])->name('user.article.show');
+
     });
 
 });
