@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\AuthenticatedUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\UserArticleController;
 use App\Http\Controllers\UserArticlePreferenceController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,8 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
     Route::prefix('article')->group(function (): void {
 
         Route::get('/', [ArticleController::class, 'index'])->name('user.article.list');
+
+        Route::get('/personalized', [UserArticleController::class, 'index'])->name('user.personalized.article.list');
 
         Route::get('/{id}', [ArticleController::class, 'show'])->name('user.article.show');
 
