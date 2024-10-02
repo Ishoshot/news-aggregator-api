@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ArticleSourceController;
 use App\Http\Controllers\Auth\AuthenticatedUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -19,5 +20,14 @@ Route::middleware('throttle:12,1')->prefix('auth')->group(function (): void {
     Route::post('/password/forgot', [PasswordResetLinkController::class, 'store'])->name('password.forgot');
 
     Route::post('/password/reset', [NewPasswordController::class, 'store'])->name('password.reset');
+
+});
+
+/* -------------------------- User Routes Sources ------------------------- */
+
+Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
+
+    // List all article sources
+    Route::get('/article-source', [ArticleSourceController::class, 'index'])->name('user.article-source.list');
 
 });
