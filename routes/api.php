@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\AuthenticatedUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\UserArticlePreferenceController;
 use Illuminate\Support\Facades\Route;
 
 /* -------------------------- Authentication Routes ------------------------- */
@@ -38,4 +39,10 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
     // List all article authors
     Route::get('/article-author', [ArticleAuthorController::class, 'index'])->name('user.article-author.list');
 
+    // Manage user preferences
+    Route::prefix('preference')->group(function (): void {
+
+        Route::get('/', [UserArticlePreferenceController::class, 'index'])->name('user.preference.list');
+
+    });
 });
