@@ -34,4 +34,7 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
     // List all article categories
     Route::get('/article-category', [ArticleCategoryController::class, 'index'])->name('user.article-category.list');
 
+    // List all article authors
+    Route::get('/article-author', [ArticleAuthorController::class, 'index'])->name('user.article-author.list');
+
 });
