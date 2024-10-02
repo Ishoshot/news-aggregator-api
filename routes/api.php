@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 /* -------------------------- Authentication Routes ------------------------- */
 
-Route::prefix('auth')->group(function (): void {
+Route::middleware('throttle:12,1')->prefix('auth')->group(function (): void {
 
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('auth.register');
 });
