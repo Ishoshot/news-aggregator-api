@@ -43,6 +43,8 @@ final class UserArticleController
 
             $filterLogic = $request->get('filter_logic', 'and');
 
+            $filterLogic = type($filterLogic)->asString();
+
             // Build dynamic filter based on user preferences and chosen logic
             if (! empty($articleCategoriesIds)) {
                 $this->applyFilterLogic($query, 'article_category_id', $articleCategoriesIds, $filterLogic);
@@ -75,6 +77,10 @@ final class UserArticleController
 
     /**
      * Apply dynamic filter logic (AND/OR) for query conditions.
+     *
+     * @param  Builder<Article>  $query
+     * @param  array<mixed>  $values
+     * @return Builder<Article>
      */
     private function applyFilterLogic(Builder $query, string $column, array $values, string $logic): Builder
     {

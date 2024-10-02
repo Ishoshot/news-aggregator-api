@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(fn(ThrottleRequestsException $e): JsonResponse => response()->json([
+        $exceptions->render(fn (ThrottleRequestsException $e): JsonResponse => response()->json([
             'message' => 'Too many requests. Please wait and try again later.',
             'retry_after' => $e->getHeaders()['Retry-After'] ?? null,
             'tip' => 'Consider slowing down the requests or batching them to avoid hitting the rate limit.',
