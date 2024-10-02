@@ -15,7 +15,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 |
 */
 
-pest()->extend(Tests\TestCase::class, RefreshDatabase::class);
+pest()->extend(Tests\TestCase::class, RefreshDatabase::class)->beforeEach(function (): void {
+    Log::spy();
+});
 
 // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
 // ->in('Feature');
