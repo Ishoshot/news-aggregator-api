@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ArticleAuthorController;
 use App\Http\Controllers\ArticleCategoryController;
 use App\Http\Controllers\ArticleSourceController;
 use App\Http\Controllers\Auth\AuthenticatedUserController;
