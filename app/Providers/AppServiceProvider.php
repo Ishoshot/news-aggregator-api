@@ -9,10 +9,12 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureSQLitePerformance();
         $this->configureModels();
         $this->configureDates();
         $this->configurePasswordValidation();
@@ -57,6 +60,18 @@ final class AppServiceProvider extends ServiceProvider
     private function configurePasswordValidation(): void
     {
         Password::defaults(fn () => Password::min(8)->numbers()->symbols()->letters()->mixedCase());
+    }
+
+    /**
+     * Configure the SQLite connection for performance optimization.
+     */
+    private function configureSQLitePerformance(): void
+    {
+        try {
+            DB::connection('sqlite')->statement('PRAGMA synchronous = OFF;');
+        } catch (Throwable $e) { // @codeCoverageIgnoreStart
+            return;
+        } // @codeCoverageIgnoreEnd
     }
 
     /**
