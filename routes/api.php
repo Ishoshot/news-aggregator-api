@@ -44,5 +44,7 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
 
         Route::get('/', [UserArticlePreferenceController::class, 'index'])->name('user.preference.list');
 
+        Route::post('/', [UserArticlePreferenceController::class, 'store'])->name('user.preference.store');
+
     });
 });

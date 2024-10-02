@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateUserPreferencesRequest;
 use App\Models\ArticleAuthor;
 use App\Models\ArticleCategory;
 use App\Models\ArticleSource;
@@ -43,6 +44,42 @@ final class UserArticlePreferenceController
             Log::error('Error occurred while retrieving user article preferences: '.$e->getMessage());
 
             return response()->json(['message' => 'Error occurred while retrieving user article preferences.'], 500);
+
+        }// @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Set user article preferences
+     */
+    public function store(UpdateUserPreferencesRequest $request): JsonResponse
+    {
+        try {
+
+            $data = $request->validated();
+
+            $user = auth()->user();
+
+            $user = type($user)->as(User::class);
+
+            $articleSources = type($data['article_sources'])->asArray();
+
+            $articleCategories = type($data['article_categories'])->asArray();
+
+            $articleAuthors = type($data['article_authors'])->asArray();
+
+            $user->articleSources()->sync($articleSources);
+
+            $user->articleCategories()->sync($articleCategories);
+
+            $user->articleAuthors()->sync($articleAuthors);
+
+            return response()->json(['message' => 'Article preferences updated successfully.'], 200);
+
+        } catch (Exception $e) {// @codeCoverageIgnoreStart
+
+            Log::error('Error occurred while updating user article preferences: '.$e->getMessage());
+
+            return response()->json(['message' => 'Error occurred while updating user article preferences.'], 500);
 
         }// @codeCoverageIgnoreEnd
     }
