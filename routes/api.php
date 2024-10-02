@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ArticleAuthorController;
 use App\Http\Controllers\ArticleCategoryController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleSourceController;
 use App\Http\Controllers\Auth\AuthenticatedUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -47,4 +48,12 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
         Route::post('/', [UserArticlePreferenceController::class, 'store'])->name('user.preference.store');
 
     });
+
+    // Article Management
+    Route::prefix('article')->group(function (): void {
+
+        Route::get('/', [ArticleController::class, 'index'])->name('user.article.list');
+
+    });
+
 });
