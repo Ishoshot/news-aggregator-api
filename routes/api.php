@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+/* -------------------------- Authentication Routes ------------------------- */
+
+Route::prefix('auth')->group(function (): void {
+
+    Route::post('/register', [RegisteredUserController::class, 'store'])->name('auth.register');
+});
