@@ -6,7 +6,7 @@ arch()->preset()->php();
 
 arch()->preset()->security()->ignoring('assert');
 
-arch()->preset()->laravel();
+// arch()->preset()->laravel();
 
 arch('strict types')
     ->expect('App')

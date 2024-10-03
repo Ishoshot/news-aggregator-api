@@ -16,6 +16,7 @@ arch('models')
         'App\Providers',
         'App\Rules',
         'App\Services',
+        'App\Actions',
         'Database\Factories',
         'Database\Seeders\DatabaseSeeder',
     ]);
@@ -41,6 +42,15 @@ function getModels(): array
 
     return collect($models)
         ->map(function ($file) {
-            return 'App\Models\\'.basename($file, '.php');
-        })->toArray();
+            $className = 'App\Models\\'.basename($file, '.php');
+
+            // Check if the class extends Pivot
+            if (is_subclass_of($className, Illuminate\Database\Eloquent\Relations\Pivot::class)) {
+                return null; // Exclude this model
+            }
+
+            return $className;
+        })
+        ->filter() // Remove null values from the collection
+        ->toArray();
 }

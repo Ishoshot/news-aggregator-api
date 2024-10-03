@@ -37,4 +37,14 @@ return [
         ],
     ],
 
+    'newsapi' => [
+        'base_url' => env('NEWSAPI_BASE_URL'),
+        'api_key' => env('NEWSAPI_API_KEY'),
+    ],
+
+    'theguardian' => [
+        'base_url' => env('THEGUARDIAN_BASE_URL'),
+        'api_key' => env('THEGUARDIAN_API_KEY'),
+    ],
+
 ];
