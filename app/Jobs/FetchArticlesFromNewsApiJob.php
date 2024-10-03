@@ -103,7 +103,7 @@ final class FetchArticlesFromNewsApiJob implements ShouldQueue
     private function prepareSourcesData(Collection $articles): Collection
     {
         return $articles->pluck('source.name')->unique()
-            ->filter(fn ($name): bool => is_string($name) && $name !== '')
+            ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
             ->map(fn (string $name): array => [
                 'id' => Str::uuid()->toString(),
                 'name' => $name,
@@ -122,7 +122,7 @@ final class FetchArticlesFromNewsApiJob implements ShouldQueue
     private function prepareAuthorsData(Collection $articles): Collection
     {
         return $articles->pluck('author')->unique()
-            ->filter(fn ($name): bool => is_string($name) && $name !== '')
+            ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
             ->map(fn (string $name): array => [
                 'id' => Str::uuid()->toString(),
                 'name' => $name,

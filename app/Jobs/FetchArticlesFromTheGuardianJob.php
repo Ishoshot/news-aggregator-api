@@ -118,7 +118,7 @@ final class FetchArticlesFromTheGuardianJob implements ShouldQueue
     private function prepareCategoriesData(Collection $articles): Collection
     {
         return $articles->pluck('sectionName')->unique()
-            ->filter(fn ($name): bool => is_string($name) && $name !== '')
+            ->filter(fn (mixed $name): bool => is_string($name) && $name !== '')
             ->map(fn (string $name): array => [
                 'id' => Str::uuid()->toString(),
                 'name' => $name,
@@ -138,10 +138,10 @@ final class FetchArticlesFromTheGuardianJob implements ShouldQueue
     {
         return $articles->pluck('tags')
             ->flatten(1)
-            ->filter(fn ($tag): bool => is_array($tag) && $tag['type'] === 'contributor' && ! empty($tag['webTitle']))
+            ->filter(fn (mixed $tag): bool => is_array($tag) && $tag['type'] === 'contributor' && ! empty($tag['webTitle']))
             ->pluck('webTitle')
             ->unique()
-            ->map(fn ($name): array => [
+            ->map(fn (mixed $name): array => [
                 'id' => Str::uuid()->toString(),
                 'name' => type($name)->asString(),
                 'slug' => Str::slug(type($name)->asString()),
