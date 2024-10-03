@@ -50,32 +50,36 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
 
             do {
 
-                /** @var array<string, mixed> $data */
                 $data = $newYorkTimes->getArticles($page);
 
-                // Ensure response is OK and data exists
-                if ($data['status'] === 'OK') {
+                $articlesArray = [];
 
-                    /** @var array<int, array<string, mixed>> $articlesArray */
-                    $articlesArray = $data['response']['docs'] ?? [];
+                if (is_array($data) && isset($data['response']) && is_array($data['response'])) {
 
-                    /** @var Collection<int, array<string, mixed>> $articles */
-                    $articles = collect($articlesArray);
+                    // Ensure response is OK and data exists
+                    if ($data['status'] === 'OK') {
 
-                    // Merge articles from this page into the main collection
-                    $allArticles = $allArticles->merge($articles);
+                        /** @var array<int, array<string, mixed>> $articlesArray */
+                        $articlesArray = $data['response']['docs'] ?? [];
 
-                    // Get the total number of results from the meta data
-                    $meta = $data['response']['meta'] ?? [];
-                    $totalResults = $meta['hits'] ?? count($articlesArray);
+                        /** @var Collection<int, array<string, mixed>> $articles */
+                        $articles = collect($articlesArray);
 
-                    // Increment page and limit tracker for the next iteration
-                    $page++;
-                    $requestCount++;
+                        // Merge articles from this page into the main collection
+                        $allArticles = $allArticles->merge($articles);
 
-                } else {
-                    // If the response is not 'OK', break the loop
-                    break;
+                        // Get the total number of results from the meta data
+                        $meta = $data['response']['meta'] ?? [];
+                        $totalResults = $meta['hits'] ?? count($articlesArray);
+
+                        // Increment page and limit tracker for the next iteration
+                        $page++;
+                        $requestCount++;
+
+                    } else {
+                        // If the response is not 'OK', break the loop
+                        break;
+                    }
                 }
 
             } while ($allArticles->count() < $totalResults && count($articlesArray) === $articlesPerPage && $requestCount < $maxRequests);
@@ -112,15 +116,13 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
      */
     private function prepareSourcesData(Collection $articles): Collection
     {
-        return $articles->pluck('source')->unique()->map(function (string $name): array {
-            return [
-                'id' => Str::uuid()->toString(),
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'created_at' => CarbonImmutable::now(),
-                'updated_at' => CarbonImmutable::now(),
-            ];
-        })->keyBy('name');
+        return $articles->pluck('source')->unique()->map(fn (mixed $name): array => [
+            'id' => Str::uuid()->toString(),
+            'name' => type($name)->asString(),
+            'slug' => Str::slug(type($name)->asString()),
+            'created_at' => CarbonImmutable::now(),
+            'updated_at' => CarbonImmutable::now(),
+        ])->keyBy('name');
     }
 
     /**
@@ -129,36 +131,31 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
      */
     private function prepareCategoriesData(Collection $articles): Collection
     {
-        return $articles->pluck('news_desk')->unique()->filter()->map(function (string $name): array {
-            return [
-                'id' => Str::uuid()->toString(),
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'created_at' => CarbonImmutable::now(),
-                'updated_at' => CarbonImmutable::now(),
-            ];
-        })->keyBy('name');
+        return $articles->pluck('news_desk')->unique()->filter()->map(fn (mixed $name): array => [
+            'id' => Str::uuid()->toString(),
+            'name' => type($name)->asString(),
+            'slug' => Str::slug(type($name)->asString()),
+            'created_at' => CarbonImmutable::now(),
+            'updated_at' => CarbonImmutable::now(),
+        ])->keyBy('name');
     }
 
     /**
-     * @param  Collection<int, array{byline: array{person: array<int, array{firstname: string, lastname: string}>}}>  $articles
+     * @param  Collection<int, array{byline: ?array{person: array<int, array{firstname: string, lastname: string}>}}>  $articles
      * @return Collection<string, array{id: string, name: string, slug: string, created_at: CarbonImmutable, updated_at: CarbonImmutable}>
      */
     private function prepareAuthorsData(Collection $articles): Collection
     {
-        return $articles->flatMap(function (array $article): array {
-            return $article['byline']['person'] ?? [];
-        })->map(function (array $person): string {
-            return trim($person['firstname'].' '.$person['lastname']);
-        })->unique()->filter()->map(function (string $name): array {
-            return [
+        return $articles->flatMap(fn (array $article): array => $article['byline']['person'] ?? [])
+            ->map(fn (array $person): string => trim($person['firstname'].' '.$person['lastname']))
+            ->unique()->filter()
+            ->map(fn (mixed $name): array => [
                 'id' => Str::uuid()->toString(),
                 'name' => $name,
                 'slug' => Str::slug($name),
                 'created_at' => CarbonImmutable::now(),
                 'updated_at' => CarbonImmutable::now(),
-            ];
-        })->keyBy('name');
+            ])->keyBy('name');
     }
 
     /**
@@ -170,8 +167,8 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
      *     multimedia: array<int, array{type: string, url: string}>,
      *     pub_date: string,
      *     source: string,
-     *     byline: array{person: array<int, array{firstname: string, lastname: string}>},
-     *     news_desk: string
+     *     byline: array{person: ?array<int, array{firstname: string, lastname: string}>},
+     *     news_desk: ?string
      * }> $articles
      * @param  Collection<string, array{id: string, name: string, slug: string, created_at: CarbonImmutable, updated_at: CarbonImmutable}>  $sources
      * @param  Collection<string, array{id: string, name: string, slug: string, created_at: CarbonImmutable, updated_at: CarbonImmutable}>  $authors
@@ -212,8 +209,8 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
                 'article_author_id' => $authorId,
                 'article_category_id' => $categoryId,
                 'title' => $article['headline']['main'],
-                'description' => $article['abstract'] ?: null,
-                'content' => $article['lead_paragraph'] ?: null,
+                'description' => $article['abstract'] !== '' && $article['abstract'] !== '0' ? $article['abstract'] : null,
+                'content' => $article['lead_paragraph'] !== '' && $article['lead_paragraph'] !== '0' ? $article['lead_paragraph'] : null,
                 'article_url' => $article['web_url'],
                 'cover_image_url' => $coverImageUrl ? 'https://www.nytimes.com/'.$coverImageUrl : null,
                 'published_at' => CarbonImmutable::parse($article['pub_date']),
@@ -228,7 +225,7 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
      */
     private function getAuthorName(array $persons): string
     {
-        if (empty($persons)) {
+        if ($persons === []) {
             return '';
         }
         $person = $persons[0];
