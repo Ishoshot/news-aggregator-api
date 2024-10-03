@@ -153,7 +153,7 @@ final class FetchArticlesFromTheGuardianJob implements ShouldQueue
     /**
      * Prepare the article data from The Guardian API response.
      *
-     * @param  Collection<int, array{sectionName: ?string, webTitle: ?string, webUrl: ?string, webPublicationDate: ?string,
+     * @param  Collection<int, array{type: ?string, sectionName: ?string, webTitle: ?string, webUrl: ?string, webPublicationDate: ?string,
      *     fields: array{trailText: ?string, body: ?string, thumbnail: ?string},
      *     tags: array<int, array{type: string, webTitle: string}>
      * }>  $articles
@@ -178,7 +178,7 @@ final class FetchArticlesFromTheGuardianJob implements ShouldQueue
                 'article_author_id' => $authorId,
                 'article_category_id' => $categoryId,
                 'title' => $article['webTitle'] ?? null,
-                'description' => $article['fields']['trailText'] ?? null,
+                'description' => $article['type'] ?? null,
                 'content' => $article['fields']['body'] ?? null,
                 'article_url' => $article['webUrl'] ?? null,
                 'cover_image_url' => $article['fields']['thumbnail'] ?? null,

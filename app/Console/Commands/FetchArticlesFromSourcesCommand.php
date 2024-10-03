@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Jobs\FetchArticlesFromNewsApiJob;
+use App\Jobs\FetchArticlesFromNewYorkTimesJob;
 use App\Jobs\FetchArticlesFromTheGuardianJob;
 use Illuminate\Console\Command;
 
@@ -45,7 +46,7 @@ final class FetchArticlesFromSourcesCommand extends Command
                 break;
 
             case 'nytimes':
-                // FetchArticlesFromNewYorkTimesJob::dispatch();
+                FetchArticlesFromNewYorkTimesJob::dispatch();
                 $this->info('Fetching articles from New York Times...');
                 break;
 
@@ -53,7 +54,7 @@ final class FetchArticlesFromSourcesCommand extends Command
                 // No argument provided, run all jobs
                 FetchArticlesFromNewsApiJob::dispatch();
                 FetchArticlesFromTheGuardianJob::dispatch();
-                // FetchArticlesFromNewYorkTimesJob::dispatch();
+                FetchArticlesFromNewYorkTimesJob::dispatch();
                 $this->info('Fetching articles from all sources...');
                 break;
 

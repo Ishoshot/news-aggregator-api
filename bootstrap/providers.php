@@ -6,4 +6,5 @@ return [
     App\Providers\AppServiceProvider::class,
     App\Providers\NewsApiServiceProvider::class,
     App\Providers\TheGuardianServiceProvider::class,
+    App\Providers\NewYorkTimesServiceProvider::class,
 ];

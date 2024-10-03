@@ -12,7 +12,6 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\UserArticleController;
 use App\Http\Controllers\UserArticlePreferenceController;
-use App\Services\External\TheGuardian;
 use Illuminate\Support\Facades\Route;
 
 /* -------------------------- Authentication Routes ------------------------- */
@@ -62,8 +61,4 @@ Route::middleware('auth:sanctum')->prefix('user')->group(function (): void {
 
     });
 
-});
-
-Route::post('/me', function (TheGuardian $theGuardian): Illuminate\Http\JsonResponse {
-    return response()->json($theGuardian->getArticles());
 });
