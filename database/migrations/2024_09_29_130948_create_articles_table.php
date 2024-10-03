@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('articles', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            $table->foreignUuid('article_source_id')->index()->constrained('article_sources')->onDelete('cascade');
-            $table->foreignUuid('article_author_id')->index()->constrained('article_authors')->onDelete('cascade');
-            $table->foreignUuid('article_category_id')->index()->constrained('article_categories')->onDelete('cascade');
+            $table->foreignUuid('article_source_id')->index()->nullable()->constrained('article_sources')->onDelete('cascade');
+            $table->foreignUuid('article_author_id')->index()->nullable()->constrained('article_authors')->onDelete('cascade');
+            $table->foreignUuid('article_category_id')->index()->nullable()->constrained('article_categories')->onDelete('cascade');
 
             $table->string('title')->index()->nullable();
             $table->text('description')->nullable();
