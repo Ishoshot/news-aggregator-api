@@ -108,8 +108,8 @@ final class FetchArticlesFromNewsApiJob implements ShouldQueue
                 'id' => Str::uuid()->toString(),
                 'name' => $name,
                 'slug' => Str::slug($name),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => CarbonImmutable::now(),
+                'updated_at' => CarbonImmutable::now(),
             ])->keyBy('name');
     }
 
@@ -127,8 +127,8 @@ final class FetchArticlesFromNewsApiJob implements ShouldQueue
                 'id' => Str::uuid()->toString(),
                 'name' => $name,
                 'slug' => Str::slug($name),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => CarbonImmutable::now(),
+                'updated_at' => CarbonImmutable::now(),
             ])->keyBy('name');
     }
 
@@ -161,8 +161,8 @@ final class FetchArticlesFromNewsApiJob implements ShouldQueue
                     'article_url' => $article['url'],
                     'cover_image_url' => $article['urlToImage'],
                     'published_at' => CarbonImmutable::parse(type($article['publishedAt'])->asString()),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_at' => CarbonImmutable::now(),
+                    'updated_at' => CarbonImmutable::now(),
                 ];
             });
     }

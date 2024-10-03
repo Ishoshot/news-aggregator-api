@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\External;
 
-use App\Exceptions\NewsApiServiceException;
+use App\Exceptions\TheGuardianServiceException;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-final readonly class NewsApi
+final readonly class TheGuardian
 {
     /**
-     * Create a new instance of NewsApi service.
+     * Create a new instance of TheGuardian service.
      */
     public function __construct(private string $baseUrl, private string $apiKey)
     {
@@ -24,7 +24,7 @@ final readonly class NewsApi
     /**
      * Fetch articles from data source
      *
-     * @throws NewsApiServiceException
+     * @throws TheGuardianServiceException
      */
     public function getArticles(int $page = 1, ?string $start_date = null, ?string $end_date = null): mixed
     {
@@ -37,8 +37,7 @@ final readonly class NewsApi
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer '.$this->apiKey,
-            ])->get($this->baseUrl.'/everything?domains=bbc.co.uk,techcrunch.com,engadget.com&page='.$page.'&sortBy=publishedAt&from='.$start_date.'&to='.$end_date);
+            ])->get($this->baseUrl.'/search?api-key='.$this->apiKey.'&page='.$page.'&page-size=50&order-by=newest&from-date='.$start_date.'&to-date='.$end_date.'&show-fields=body&show-tags=contributor,type');
 
             if ($response->failed()) {
 
@@ -46,9 +45,9 @@ final readonly class NewsApi
 
                 $responseBody = $response->body();
 
-                Log::error("NewsApi.getArticles() - API request failed with status code $statusCode. Response body: $responseBody");
+                Log::error("TheGuardian.getArticles() - API request failed with status code $statusCode. Response body: $responseBody");
 
-                throw new NewsApiServiceException("API request failed with status code $statusCode");
+                throw new TheGuardianServiceException("API request failed with status code $statusCode");
             }
 
             return $response->json();
@@ -56,19 +55,19 @@ final readonly class NewsApi
             //
         } catch (ConnectionException) {
 
-            Log::error('NewsApi.getArticles() - Connection timeout');
+            Log::error('TheGuardian.getArticles() - Connection timeout');
 
-            throw new NewsApiServiceException('Connection with NewsApi service timeout');
+            throw new TheGuardianServiceException('Connection with TheGuardian service timeout');
             //
-        } catch (NewsApiServiceException $e) {
+        } catch (TheGuardianServiceException $e) {
 
-            Log::error('NewsApi.getArticles() - '.$e->getMessage());
+            Log::error('TheGuardian.getArticles() - '.$e->getMessage());
 
             throw $e;
             //
         } catch (Exception $e) {
 
-            Log::error('NewsApi.getArticles(): Exception - '.$e->getMessage());
+            Log::error('TheGuardian.getArticles(): Exception - '.$e->getMessage());
 
             throw $e;
             //
