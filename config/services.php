@@ -47,4 +47,9 @@ return [
         'api_key' => env('THEGUARDIAN_API_KEY'),
     ],
 
+    'nytimes' => [
+        'base_url' => env('NEWYORKTIMES_BASE_URL'),
+        'api_key' => env('NEWYORKTIMES_API_KEY'),
+    ],
+
 ];
