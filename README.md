@@ -2,7 +2,7 @@
 
 This is a RESTful API for a news aggregator service that pulls articles from various sources and provides endpoints for a front-end application to consume.
 
-> Ready to execute requests and comprehensive API documentation can be found [here](https://documenter.getpostman.com/view/8213381/2sAXxJhurS).
+> Ready-to-execute requests and comprehensive API documentation can be found [here](https://documenter.getpostman.com/view/8213381/2sAXxJhurS).
 
 ## Installation
 
