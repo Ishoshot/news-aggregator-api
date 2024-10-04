@@ -6,10 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ArticleSearchRequest;
 use App\Models\Article;
+use App\Models\User;
 use App\Services\Internal\ArticleService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 final class ArticleController
@@ -26,15 +29,24 @@ final class ArticleController
     {
         try {
 
-            $query = Article::query();
+            $user = auth()->user();
 
-            $this->articleService->filter($query, $request);
+            $user = type($user)->as(User::class);
 
-            $this->articleService->sort($query, $request);
+            $cacheKey = $this->generateCacheKey($user->id, $request);
 
-            $articles = $query->paginate($request->integer('per_page', 10));
+            return Cache::tags(['articles'])->remember($cacheKey, now()->addMinutes(15), function () use ($request): JsonResponse {
 
-            return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles]);
+                $query = Article::query();
+
+                $this->articleService->filter($query, $request);
+
+                $this->articleService->sort($query, $request);
+
+                $articles = $query->paginate($request->integer('per_page', 10));
+
+                return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles]);
+            });
 
         } catch (Exception $e) {// @codeCoverageIgnoreStart
 
@@ -73,5 +85,20 @@ final class ArticleController
             return response()->json(['message' => 'Error occurred while retrieving article.'], 500);
 
         }// @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Generate a unique cache key
+     */
+    private function generateCacheKey(int $userId, ArticleSearchRequest $request): string
+    {
+        $requestParams = $request->all();
+        ksort($requestParams);
+        $requestString = http_build_query($requestParams);
+
+        $dataToHash = $userId.$requestString;
+        $hashedKey = Hash::make($dataToHash);
+
+        return 'articles:'.$hashedKey;
     }
 }

@@ -8,6 +8,7 @@ use App\Jobs\FetchArticlesFromNewsApiJob;
 use App\Jobs\FetchArticlesFromNewYorkTimesJob;
 use App\Jobs\FetchArticlesFromTheGuardianJob;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 final class FetchArticlesFromSourcesCommand extends Command
 {
@@ -38,16 +39,19 @@ final class FetchArticlesFromSourcesCommand extends Command
             case 'newsapi':
                 FetchArticlesFromNewsApiJob::dispatch();
                 $this->info('Fetching articles from News API...');
+                $this->invalidateCache();
                 break;
 
             case 'theguardian':
                 FetchArticlesFromTheGuardianJob::dispatch();
                 $this->info('Fetching articles from The Guardian...');
+                $this->invalidateCache();
                 break;
 
             case 'nytimes':
                 FetchArticlesFromNewYorkTimesJob::dispatch();
                 $this->info('Fetching articles from New York Times...');
+                $this->invalidateCache();
                 break;
 
             case null:
@@ -56,11 +60,21 @@ final class FetchArticlesFromSourcesCommand extends Command
                 FetchArticlesFromTheGuardianJob::dispatch();
                 FetchArticlesFromNewYorkTimesJob::dispatch();
                 $this->info('Fetching articles from all sources...');
+                $this->invalidateCache();
                 break;
 
             default:
                 $this->error('Invalid source specified. Valid options are: newsapi, theguardian, nytimes');
         }
 
+    }
+
+    /**
+     * Handle cache invalidation
+     */
+    private function invalidateCache(): void
+    {
+        Cache::tags(['articles', 'sources', 'authors', 'categories', 'user_articles'])->flush();
+        $this->info('Cache invalidated.');
     }
 }

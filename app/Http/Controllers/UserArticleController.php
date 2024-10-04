@@ -11,6 +11,8 @@ use App\Services\Internal\ArticleService;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 final class UserArticleController
@@ -31,40 +33,46 @@ final class UserArticleController
 
             $user = type($user)->as(User::class);
 
-            $user = $user->load(['articleSources', 'articleCategories', 'articleAuthors']);
+            $cacheKey = $this->generateCacheKey($user->id, $request);
 
-            $articleSourcesIds = $user->articleSources->pluck('id')->toArray();
+            return Cache::tags(['user_articles'])->remember($cacheKey, now()->addMinutes(15), function () use ($user, $request): JsonResponse {
 
-            $articleCategoriesIds = $user->articleCategories->pluck('id')->toArray();
+                $user = $user->load(['articleSources', 'articleCategories', 'articleAuthors']);
 
-            $articleAuthorsIds = $user->articleAuthors->pluck('id')->toArray();
+                $articleSourcesIds = $user->articleSources->pluck('id')->toArray();
 
-            $query = Article::query();
+                $articleCategoriesIds = $user->articleCategories->pluck('id')->toArray();
 
-            $filterLogic = $request->get('filter_logic', 'and');
+                $articleAuthorsIds = $user->articleAuthors->pluck('id')->toArray();
 
-            $filterLogic = type($filterLogic)->asString();
+                $query = Article::query();
 
-            // Build dynamic filter based on user preferences and chosen logic
-            if (! empty($articleCategoriesIds)) {
-                $this->applyFilterLogic($query, 'article_category_id', $articleCategoriesIds, $filterLogic);
-            }
+                $filterLogic = $request->get('filter_logic', 'and');
 
-            if (! empty($articleSourcesIds)) {
-                $this->applyFilterLogic($query, 'article_source_id', $articleSourcesIds, $filterLogic);
-            }
+                $filterLogic = type($filterLogic)->asString();
 
-            if (! empty($articleAuthorsIds)) {
-                $this->applyFilterLogic($query, 'article_author_id', $articleAuthorsIds, $filterLogic);
-            }
+                // Build dynamic filter based on user preferences and chosen logic
+                if (! empty($articleCategoriesIds)) {
+                    $this->applyFilterLogic($query, 'article_category_id', $articleCategoriesIds, $filterLogic);
+                }
 
-            $this->articleService->filter($query, $request);
+                if (! empty($articleSourcesIds)) {
+                    $this->applyFilterLogic($query, 'article_source_id', $articleSourcesIds, $filterLogic);
+                }
 
-            $this->articleService->sort($query, $request);
+                if (! empty($articleAuthorsIds)) {
+                    $this->applyFilterLogic($query, 'article_author_id', $articleAuthorsIds, $filterLogic);
+                }
 
-            $articles = $query->paginate($request->integer('per_page', 10));
+                $this->articleService->filter($query, $request);
 
-            return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles, 'dd' => $filterLogic]);
+                $this->articleService->sort($query, $request);
+
+                $articles = $query->paginate($request->integer('per_page', 10));
+
+                return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles]);
+
+            });
 
         } catch (Exception $e) {// @codeCoverageIgnoreStart
 
@@ -90,5 +98,20 @@ final class UserArticleController
 
         // Default to 'and' logic
         return $query->whereIn($column, $values);
+    }
+
+    /**
+     * Generate a unique cache key
+     */
+    private function generateCacheKey(int $userId, UserArticleSearchRequest $request): string
+    {
+        $requestParams = $request->all();
+        ksort($requestParams);
+        $requestString = http_build_query($requestParams);
+
+        $dataToHash = $userId.$requestString;
+        $hashedKey = Hash::make($dataToHash);
+
+        return 'user_articles:'.$hashedKey;
     }
 }
