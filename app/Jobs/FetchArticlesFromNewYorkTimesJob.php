@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -95,13 +96,15 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
 
                 $processedArticles = $this->prepareArticlesData($allArticles, $sources, $authors, $categories);
 
-                ArticleSource::insertOrIgnore($sources->values()->toArray());
+                DB::transaction(function () use ($sources, $categories, $authors, $processedArticles): void {
+                    ArticleSource::insertOrIgnore($sources->values()->toArray());
 
-                ArticleCategory::insertOrIgnore($categories->values()->toArray());
+                    ArticleCategory::insertOrIgnore($categories->values()->toArray());
 
-                ArticleAuthor::insertOrIgnore($authors->values()->toArray());
+                    ArticleAuthor::insertOrIgnore($authors->values()->toArray());
 
-                Article::insertOrIgnore($processedArticles->toArray());
+                    Article::insertOrIgnore($processedArticles->toArray());
+                });
 
             }
 

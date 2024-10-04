@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -99,9 +100,14 @@ final class FetchArticlesFromTheGuardianJob implements ShouldQueue
                 $processedArticles = $this->prepareArticlesData($allArticles, $categories, $authors, $source);
 
                 // Insert categories, authors, and articles
-                ArticleCategory::insertOrIgnore($categories->values()->toArray());
-                ArticleAuthor::insertOrIgnore($authors->values()->toArray());
-                Article::insertOrIgnore($processedArticles->toArray());
+                DB::transaction(function () use ($categories, $authors, $processedArticles): void {
+
+                    ArticleCategory::insertOrIgnore($categories->values()->toArray());
+
+                    ArticleAuthor::insertOrIgnore($authors->values()->toArray());
+
+                    Article::insertOrIgnore($processedArticles->toArray());
+                });
             }
 
         } catch (Exception $e) {
