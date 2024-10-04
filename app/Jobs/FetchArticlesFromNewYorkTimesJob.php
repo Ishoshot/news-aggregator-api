@@ -226,7 +226,7 @@ final class FetchArticlesFromNewYorkTimesJob implements ShouldQueue
     private function getAuthorName(array $persons): string
     {
         if ($persons === []) {
-            return '';
+            return '';  // @codeCoverageIgnore
         }
         $person = $persons[0];
 

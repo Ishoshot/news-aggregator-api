@@ -111,6 +111,43 @@ it('fetches personalized articles based on multiple sources and categories', fun
         );
 });
 
+it('fetches personalized articles based on multiple sources and categories using OR logic filter', function (): void {
+
+    $user = User::factory()->create();
+
+    $articleSources = ArticleSource::factory(3)->create();
+
+    $articleCategories = ArticleCategory::factory(3)->create();
+
+    // Attach multiple sources and categories
+    $user->articleSources()->attach($articleSources);
+    $user->articleCategories()->attach($articleCategories);
+
+    Sanctum::actingAs($user);
+
+    Article::factory()->create([
+        'article_source_id' => $articleSources[0]->id,
+        'article_category_id' => $articleCategories[0]->id,
+        'published_at' => Carbon::now(),
+    ]);
+
+    Article::factory()->create([
+        'article_source_id' => $articleSources[1]->id,
+        'article_category_id' => $articleCategories[1]->id,
+        'published_at' => Carbon::now(),
+    ]);
+
+    Article::factory(3)->create();
+
+    $response = $this->getJson(route('user.personalized.article.list', ['filter_logic' => 'or']));
+
+    $response->assertStatus(200)
+        ->assertJson(fn (AssertableJson $json) => $json->where('message', 'Articles retrieved successfully.')
+            ->has('data.data', 2) // Two articles match the preferences
+            ->etc()
+        );
+});
+
 it('filters personalized articles by keyword', function (): void {
 
     $user = User::factory()->create();
