@@ -13,6 +13,8 @@ final class NewsApiServiceException extends Exception
 {
     /**
      * Report the exception.
+     *
+     * @codeCoverageIgnore
      */
     public function report(): void
     {
@@ -21,6 +23,8 @@ final class NewsApiServiceException extends Exception
 
     /**
      * Render the exception as an HTTP response.
+     *
+     * @codeCoverageIgnore
      */
     public function render(Request $request): JsonResponse
     {

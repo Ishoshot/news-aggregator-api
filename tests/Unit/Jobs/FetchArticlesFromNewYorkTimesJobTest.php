@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 
-// Test successful article fetching and processing
 it('fetches articles from New York Times and processes them', function (): void {
 
     Http::fake([
@@ -45,7 +44,6 @@ it('fetches articles from New York Times and processes them', function (): void 
     expect(Article::first()->description)->toBe('Sample article abstract.');
 });
 
-// Test handling of unsuccessful API response
 it('logs an error if the New York Times API response is not OK', function (): void {
 
     Http::fake([
