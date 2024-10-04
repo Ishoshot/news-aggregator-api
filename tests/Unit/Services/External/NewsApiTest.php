@@ -7,6 +7,7 @@ namespace Tests\Unit\Services\External;
 use App\Exceptions\NewsApiServiceException;
 use App\Services\External\NewsApi;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -45,6 +46,23 @@ it('throws an exception when the API request fails', function (): void {
 
     $this->newsApi->getArticles();
 
+});
+
+it('logs and rethrows general exceptions', function (): void {
+
+    Http::fake(function () {
+        throw new Exception('Unexpected error occurred');
+    });
+
+    Log::spy();
+
+    $this->expectException(Exception::class);
+
+    $this->expectExceptionMessage('Unexpected error occurred');
+
+    $this->newsApi->getArticles();
+
+    Log::shouldHaveReceived('error')->with('NewsApi.getArticles(): Exception - Unexpected error occurred');
 });
 
 it('handles connection timeout gracefully', function (): void {

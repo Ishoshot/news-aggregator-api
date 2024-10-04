@@ -64,7 +64,7 @@ final class UserArticleController
 
             $articles = $query->paginate($request->integer('per_page', 10));
 
-            return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles]);
+            return response()->json(['message' => 'Articles retrieved successfully.', 'data' => $articles, 'dd' => $filterLogic]);
 
         } catch (Exception $e) {// @codeCoverageIgnoreStart
 

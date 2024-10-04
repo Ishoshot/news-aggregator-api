@@ -7,6 +7,7 @@ namespace Tests\Unit\Services\External;
 use App\Exceptions\TheGuardianServiceException;
 use App\Services\External\TheGuardian;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -46,6 +47,23 @@ it('throws an exception when the API request fails', function (): void {
 
     Log::shouldHaveReceived('error');
 
+});
+
+it('logs and rethrows general exceptions', function (): void {
+
+    Http::fake(function () {
+        throw new Exception('Unexpected error occurred');
+    });
+
+    Log::spy();
+
+    $this->expectException(Exception::class);
+
+    $this->expectExceptionMessage('Unexpected error occurred');
+
+    $this->guardianService->getArticles();
+
+    Log::shouldHaveReceived('error')->with('TheGuardian.getArticles(): Exception - Unexpected error occurred');
 });
 
 it('handles connection timeout gracefully', function (): void {

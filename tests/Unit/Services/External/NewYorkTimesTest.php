@@ -64,7 +64,7 @@ it('logs error and throws NewYorkTimesServiceException on connection timeout', f
 
 it('logs and rethrows general exceptions', function (): void {
 
-    Http::fake(function () {
+    Http::fake(function (): never {
         throw new Exception('Unexpected error occurred');
     });
 
